@@ -1,4 +1,4 @@
-FROM node:18-bullseye-slim
+FROM node:20-bullseye-slim
 
 # Install Chromium, its dependencies, and build tools for node-gyp
 RUN apt-get update && apt-get install -y \
