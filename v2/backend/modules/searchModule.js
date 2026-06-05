@@ -175,88 +175,73 @@ async function searchGoogleMaps(query, location, maxResults, onProgress) {
     if (!placeLinks.length) return [];
     onProgress?.({ pct: 28, text: `📍 ${placeLinks.length} negocios encontrados. Extrayendo...` });
 
-    // Extracción paralela reducida a 1 para evitar OOM Crash
-    const CONCURRENCY = 1;
+    // Extracción secuencial reutilizando LA MISMA PESTAÑA para ahorrar RAM máxima
     const results = [];
-    for (let i = 0; i < placeLinks.length; i += CONCURRENCY) {
-      const batch = placeLinks.slice(i, i + CONCURRENCY);
+    for (let i = 0; i < placeLinks.length; i++) {
+      const link = placeLinks[i];
       onProgress?.({
         pct: 28 + Math.round((i / placeLinks.length) * 42),
-        text: `📊 Lote ${Math.floor(i / CONCURRENCY) + 1}: ${batch.map(b => b.name).join(', ').slice(0, 60)}...`
+        text: `📊 Extrayendo (${i+1}/${placeLinks.length}): ${link.name.slice(0, 40)}...`
       });
 
-      const batchResults = await Promise.all(batch.map(async link => {
-        let detailPage;
-        for (let attempt = 0; attempt < 2; attempt++) {
-          try {
-            detailPage = await browser.newPage();
-            await detailPage.setRequestInterception(true);
-            detailPage.on('request', req => ['image', 'font', 'media'].includes(req.resourceType()) ? req.abort() : req.continue());
-            await detailPage.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
-            await detailPage.goto(link.href, { waitUntil: 'domcontentloaded', timeout: 20000 });
-            await delay(attempt === 0 ? 1500 : 2500);
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          await page.goto(link.href, { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await delay(attempt === 0 ? 1500 : 2500);
 
-            const data = await detailPage.evaluate(() => {
-              const q = sel => document.querySelector(sel);
-              const name = q('h1.DUwDvf')?.textContent?.trim() || q('h1')?.textContent?.trim() || '';
-              const ratingEl = q('div.F7nice span[aria-hidden="true"]') || q('span.ceNzKf');
-              const rating = ratingEl?.textContent?.trim() || null;
-              const reviewsEl = q('div.F7nice span[aria-label]');
-              const reviews = (reviewsEl?.getAttribute('aria-label') || '').match(/[\d,.]+/)?.[0]?.replace(/[,.]/g, '') || '0';
-              const category = q('button.DkEaL')?.textContent?.trim() || '';
-              const addrEl = q('button[data-item-id="address"] .Io6YTe') || q('[data-item-id="address"]');
-              const address = addrEl?.textContent?.trim() || '';
+          const data = await page.evaluate(() => {
+            const q = sel => document.querySelector(sel);
+            const name = q('h1.DUwDvf')?.textContent?.trim() || q('h1')?.textContent?.trim() || '';
+            const ratingEl = q('div.F7nice span[aria-hidden="true"]') || q('span.ceNzKf');
+            const rating = ratingEl?.textContent?.trim() || null;
+            const reviewsEl = q('div.F7nice span[aria-label]');
+            const reviews = (reviewsEl?.getAttribute('aria-label') || '').match(/[\d,.]+/)?.[0]?.replace(/[,.]/g, '') || '0';
+            const category = q('button.DkEaL')?.textContent?.trim() || '';
+            const addrEl = q('button[data-item-id="address"] .Io6YTe') || q('[data-item-id="address"]');
+            const address = addrEl?.textContent?.trim() || '';
 
-              // Extracción de teléfono mejorada — múltiples estrategias
-              let phone = '';
-              const phoneBtn = q('button[data-item-id^="phone:tel:"]') || q('a[data-item-id^="phone:tel:"]');
-              if (phoneBtn) {
-                phone = phoneBtn.dataset?.itemId?.replace('phone:tel:', '') ||
-                        phoneBtn.querySelector('.Io6YTe')?.textContent?.trim() || '';
+            let phone = '';
+            const phoneBtn = q('button[data-item-id^="phone:tel:"]') || q('a[data-item-id^="phone:tel:"]');
+            if (phoneBtn) {
+              phone = phoneBtn.dataset?.itemId?.replace('phone:tel:', '') || phoneBtn.querySelector('.Io6YTe')?.textContent?.trim() || '';
+            }
+            if (!phone) {
+              for (const btn of document.querySelectorAll('button[aria-label], a[aria-label]')) {
+                const lbl = (btn.getAttribute('aria-label') || '').trim();
+                if (/^[+\d()\-\s]{7,20}$/.test(lbl)) { phone = lbl; break; }
               }
-              if (!phone) {
-                for (const btn of document.querySelectorAll('button[aria-label], a[aria-label]')) {
-                  const lbl = (btn.getAttribute('aria-label') || '').trim();
-                  if (/^[+\d()\-\s]{7,20}$/.test(lbl)) { phone = lbl; break; }
-                }
-              }
-              if (!phone) {
-                const telLinks = document.querySelectorAll('a[href^="tel:"]');
-                if (telLinks.length) phone = telLinks[0].getAttribute('href').replace('tel:', '');
-              }
-              if (!phone) {
-                // Buscar en todo el texto visible del panel
-                const bodyText = document.body.innerText;
-                const phoneMatch = bodyText.match(/(?:\+57|57|0)?[\s-]?3\d{2}[\s-]?\d{3}[\s-]?\d{4}/);
-                if (phoneMatch) phone = phoneMatch[0];
-              }
+            }
+            if (!phone) {
+              const telLinks = document.querySelectorAll('a[href^="tel:"]');
+              if (telLinks.length) phone = telLinks[0].getAttribute('href').replace('tel:', '');
+            }
+            if (!phone) {
+              const bodyText = document.body.innerText;
+              const phoneMatch = bodyText.match(/(?:\+57|57|0)?[\s-]?3\d{2}[\s-]?\d{3}[\s-]?\d{4}/);
+              if (phoneMatch) phone = phoneMatch[0];
+            }
 
-              const websiteEl = q('a[data-item-id="authority"]') || q('a[href*="http"][data-item-id*="web"]');
-              const website = websiteEl?.href || '';
-              let email = '';
-              const emailMatch = document.body.innerText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-              if (emailMatch) email = emailMatch[0];
+            const websiteEl = q('a[data-item-id="authority"]') || q('a[href*="http"][data-item-id*="web"]');
+            const website = websiteEl?.href || '';
+            let email = '';
+            const emailMatch = document.body.innerText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+            if (emailMatch) email = emailMatch[0];
 
-              // Extraer lat/lon de la URL actual
-              let lat = null, lon = null;
-              const urlMatch = window.location.href.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-              if (urlMatch) { lat = parseFloat(urlMatch[1]); lon = parseFloat(urlMatch[2]); }
+            let lat = null, lon = null;
+            const urlMatch = window.location.href.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+            if (urlMatch) { lat = parseFloat(urlMatch[1]); lon = parseFloat(urlMatch[2]); }
 
-              return { name, rating, reviews, category, address, phone, website, email, lat, lon };
-            });
+            return { name, rating, reviews, category, address, phone, website, email, lat, lon };
+          });
 
-            await detailPage.close().catch(() => {});
-            if (data?.name) return data;
-          } catch (err) {
-            try { await detailPage?.close().catch(() => {}); } catch {}
-            if (attempt === 0) await delay(1500);
+          if (data?.name) {
+            results.push(data);
+            break;
           }
+        } catch (err) {
+          if (attempt === 0) await delay(1500);
         }
-        return null;
-      }));
-
-      results.push(...batchResults.filter(Boolean));
-      await delay(300);
+      }
     }
 
     return results;
