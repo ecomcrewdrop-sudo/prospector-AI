@@ -4,7 +4,7 @@
   "description": "Redirige el despliegue de Railway a la carpeta v2/backend",
   "scripts": {
     "build": "cd v2/backend && npm install",
-    "start": "cd v2/backend && node server.js"
+    "start": "cd v2/backend && npm start"
   },
   "engines": {
     "node": ">=18.0.0"

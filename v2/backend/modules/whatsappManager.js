@@ -277,7 +277,13 @@ function createClient(sessionId = DEFAULT_SESSION_ID) {
     },
     puppeteer: {
       headless:       true,
-      executablePath: (process.env.CHROME_PATH && require('fs').existsSync(process.env.CHROME_PATH)) ? process.env.CHROME_PATH : undefined,
+      executablePath: (() => {
+        const fs = require('fs');
+        if (process.env.CHROME_PATH && fs.existsSync(process.env.CHROME_PATH)) return process.env.CHROME_PATH;
+        if (fs.existsSync('/usr/bin/chromium')) return '/usr/bin/chromium';
+        if (fs.existsSync('/usr/bin/google-chrome-stable')) return '/usr/bin/google-chrome-stable';
+        return undefined;
+      })(),
       args:           PUPPETEER_ARGS,
       timeout:        60000,
     },
