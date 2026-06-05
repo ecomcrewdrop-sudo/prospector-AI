@@ -1,4 +1,4 @@
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const BASE = 'https://prospector-ai-production-94fe.up.railway.app';
 
 async function req(method, path, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } };
