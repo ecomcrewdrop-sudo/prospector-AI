@@ -1,0 +1,22 @@
+node_modules/
+.env
+.DS_Store
+
+# WhatsApp auth and caches
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Databases and uploads
+data/
+uploads/
+*.db
+*.sqlite
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Frontend builds
+v2/frontend/dist/
+v2/frontend/.eslintcache

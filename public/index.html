@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Prospector AI — Sistema automatizado de captación y prospección de clientes con WhatsApp" />
+  <title>Prospector AI — Automatización de Prospectos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ─── SPLASH SCREEN ─── -->
+  <div id="splash" class="splash">
+    <div class="splash-content">
+      <div class="splash-logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" stroke="url(#lg)" stroke-width="2.5"/><path d="M14 24c0-5.523 4.477-10 10-10s10 4.477 10 10" stroke="url(#lg2)" stroke-width="2.5" stroke-linecap="round"/><circle cx="24" cy="30" r="4" fill="url(#lg3)"/><defs><linearGradient id="lg" x1="2" y1="2" x2="46" y2="46" gradientUnits="userSpaceOnUse"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#a855f7"/></linearGradient><linearGradient id="lg2" x1="14" y1="14" x2="34" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#a855f7"/></linearGradient><linearGradient id="lg3" x1="20" y1="26" x2="28" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs></svg>
+        </div>
+        <span>Prospector <strong>AI</strong></span>
+      </div>
+      <div class="splash-bar"><div class="splash-fill"></div></div>
+      <p class="splash-text">Inicializando sistema de prospección...</p>
+    </div>
+  </div>
+
+  <!-- ─── WRAPPER ─── -->
+  <div id="app" class="app hidden">
+
+    <!-- ─── SIDEBAR ─── -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 48 48" fill="none" width="28" height="28"><circle cx="24" cy="24" r="22" stroke="url(#slg)" stroke-width="2.5"/><path d="M14 24c0-5.523 4.477-10 10-10s10 4.477 10 10" stroke="url(#slg2)" stroke-width="2.5" stroke-linecap="round"/><circle cx="24" cy="30" r="4" fill="url(#slg3)"/><defs><linearGradient id="slg" x1="2" y1="2" x2="46" y2="46" gradientUnits="userSpaceOnUse"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#a855f7"/></linearGradient><linearGradient id="slg2" x1="14" y1="14" x2="34" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#a855f7"/></linearGradient><linearGradient id="slg3" x1="20" y1="26" x2="28" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs></svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">Prospector</span>
+          <span class="brand-tag">AI</span>
+        </div>
+        <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+      </div>
+
+      <!-- WhatsApp Status Badge -->
+      <div class="wa-badge" id="waBadge" onclick="showPage('connect')">
+        <div class="wa-dot" id="waDot"></div>
+        <span id="waStatusText">Conectar WhatsApp</span>
+      </div>
+
+      <div style="padding: 15px; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <label style="color:var(--text-3); font-size:0.7rem; text-transform:uppercase; font-weight:700; letter-spacing:1px; margin-bottom:6px; display:block;">📱 Entorno de WhatsApp</label>
+        <select id="workspaceSelect" class="select-input" style="width:100%; font-size:0.85rem; padding: 6px 10px; background:var(--bg-1); border:1px solid var(--border);" onchange="changeWorkspace()">
+          <option value="session-1">session-1 (Por defecto)</option>
+        </select>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-section">
+          <span class="nav-label">PRINCIPAL</span>
+          <button class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            <span>Dashboard</span>
+          </button>
+          <button class="nav-item" id="nav-search" onclick="showPage('search')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+            <span>Buscar Prospectos</span>
+            <span class="nav-badge" id="searchBadge">NEW</span>
+          </button>
+          <button class="nav-item" id="nav-prospects" onclick="showPage('prospects')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>Prospectos</span>
+            <span class="nav-count" id="prospectsCount">0</span>
+          </button>
+          <button class="nav-item" id="nav-niches" onclick="showPage('niches')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>
+            <span>Nichos</span>
+            <span class="nav-count" id="nichesCount">0</span>
+          </button>
+        </div>
+        <div class="nav-section">
+          <span class="nav-label">CAMPAÑAS</span>
+          <button class="nav-item" id="nav-campaigns" onclick="showPage('campaigns')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            <span>Campañas</span>
+          </button>
+          <button class="nav-item" id="nav-templates" onclick="showPage('templates')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+            <span>Plantillas</span>
+          </button>
+        </div>
+        <div class="nav-section">
+          <span class="nav-label">SISTEMA</span>
+          <button class="nav-item" id="nav-connect" onclick="showPage('connect')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.5a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.72 16z"/></svg>
+            <span>WhatsApp</span>
+          </button>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="version-badge">v2.0 · 2026</div>
+      </div>
+    </aside>
+
+    <!-- ─── MAIN CONTENT ─── -->
+    <main class="main" id="main">
+      
+      <!-- TOP BAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn" onclick="toggleSidebar()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+          </button>
+          <div class="breadcrumb" id="breadcrumb">Dashboard</div>
+        </div>
+        <div class="topbar-right">
+          <div class="wa-status-pill" id="waStatusPill">
+            <div class="status-dot disconnected" id="statusDot"></div>
+            <span id="statusLabel">Desconectado</span>
+          </div>
+          <button class="icon-btn notify-btn" id="notifyBtn" onclick="toggleNotifications()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notify-dot hidden" id="notifyDot">0</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- ─── NOTIFICATIONS PANEL ─── -->
+      <div class="notifications-panel hidden" id="notificationsPanel">
+        <div class="notifications-header">
+          <h3>Centro de Notificaciones</h3>
+          <button class="icon-btn-sm" onclick="clearNotifications()" title="Limpiar todas" style="background:transparent; border:none; color:var(--text-3); cursor:pointer;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+        <div class="notifications-filters">
+          <button class="notif-filter active" onclick="filterNotifs('all')">Todas</button>
+          <button class="notif-filter" onclick="filterNotifs('info')">Info</button>
+          <button class="notif-filter" onclick="filterNotifs('success')">Éxito</button>
+          <button class="notif-filter" onclick="filterNotifs('warning')">Alertas</button>
+          <button class="notif-filter" onclick="filterNotifs('error')">Errores</button>
+        </div>
+        <div class="notifications-body" id="notificationsList">
+          <div class="empty-state-sm" style="flex-direction:column; padding: 40px 20px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32" style="margin-bottom:10px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <p>No hay notificaciones nuevas</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════ -->
+      <!-- PAGE: DASHBOARD                             -->
+      <!-- ═══════════════════════════════════════════ -->
+      <section class="page active" id="page-dashboard">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Panel de Control</h1>
+            <p class="page-sub">Resumen en tiempo real de tu sistema de prospección</p>
+          </div>
+          <button class="btn btn-primary" onclick="showPage('search')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+            Nueva Búsqueda
+          </button>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="statsGrid">
+          <div class="stat-card gradient-purple">
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-prospects">0</span>
+              <span class="stat-label">Prospectos Totales</span>
+            </div>
+            <div class="stat-trend up" id="trend-prospects">+0%</div>
+          </div>
+          <div class="stat-card gradient-green">
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-sent">0</span>
+              <span class="stat-label">Mensajes Enviados</span>
+            </div>
+            <div class="stat-trend up" id="trend-sent">+0%</div>
+          </div>
+          <div class="stat-card gradient-orange">
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-replies">0</span>
+              <span class="stat-label">Respuestas</span>
+            </div>
+            <div class="stat-trend up" id="trend-replies">+0%</div>
+          </div>
+          <div class="stat-card gradient-blue">
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-conversion">0%</span>
+              <span class="stat-label">Tasa de Conversión</span>
+            </div>
+            <div class="stat-trend neutral" id="trend-conversion">—</div>
+          </div>
+        </div>
+
+        <!-- Quick Map: Has Website vs No -->
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3>Oportunidades de Nicho</h3>
+              <span class="chip">Web</span>
+            </div>
+            <div class="opportunity-bars" id="opportunityBars">
+              <div class="opp-item">
+                <div class="opp-label">
+                  <span>Sin Sitio Web</span>
+                  <span class="opp-val" id="noWebCount">0</span>
+                </div>
+                <div class="opp-bar"><div class="opp-fill hot" id="noWebBar" style="width:0%"></div></div>
+              </div>
+              <div class="opp-item">
+                <div class="opp-label">
+                  <span>Con Sitio Web</span>
+                  <span class="opp-val" id="withWebCount">0</span>
+                </div>
+                <div class="opp-bar"><div class="opp-fill cool" id="withWebBar" style="width:0%"></div></div>
+              </div>
+              <div class="opp-item">
+                <div class="opp-label">
+                  <span>Con Instagram</span>
+                  <span class="opp-val" id="withIgCount">0</span>
+                </div>
+                <div class="opp-bar"><div class="opp-fill purple" id="withIgBar" style="width:0%"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Campañas Activas</h3>
+              <button class="btn btn-sm btn-ghost" onclick="showPage('campaigns')">Ver todas</button>
+            </div>
+            <div id="dashCampaigns" class="dash-campaigns">
+              <div class="empty-state-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m22 2-7 20-4-9-9-4Z"/></svg>
+                <p>No hay campañas activas</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card activity-card">
+            <div class="card-header">
+              <h3>Actividad Reciente</h3>
+              <span class="live-dot"></span>
+            </div>
+            <div class="activity-feed" id="activityFeed">
+              <div class="activity-item">
+                <div class="activity-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                <div>
+                  <p class="activity-text">Sistema iniciado correctamente</p>
+                  <span class="activity-time">Ahora mismo</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════ -->
+      <!-- PAGE: SEARCH                                -->
+      <!-- ═══════════════════════════════════════════ -->
+      <section class="page" id="page-search">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Buscar Prospectos</h1>
+            <p class="page-sub">Motor de búsqueda inteligente con análisis automático</p>
+          </div>
+        </div>
+
+        <!-- Search Panel -->
+        <div class="search-panel">
+          <div class="search-hero">
+            <div class="search-glow"></div>
+            <h2>¿Qué tipo de negocio buscas?</h2>
+            <p>El sistema buscará, analizará y extraerá automáticamente toda la información relevante</p>
+
+            <div class="search-inputs">
+              <div class="input-group">
+                <label for="searchQuery">Tipo de negocio o servicio</label>
+                <div class="input-with-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+                  <input type="text" id="searchQuery" placeholder="Ej: salones de belleza, restaurantes, dentistas..." />
+                </div>
+              </div>
+              <div class="input-group">
+                <label for="searchLocation">Ciudad o país</label>
+                <div class="input-with-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <input type="text" id="searchLocation" placeholder="Ej: Medellín, Bogotá, Ciudad de México..." />
+                </div>
+              </div>
+              <div class="input-group">
+                <label for="searchSource">Fuente de Datos</label>
+                <select id="searchSource" class="select-input">
+                  <option value="maps" selected>📍 Google Maps (B2B)</option>
+                  <option value="instagram">📸 Instagram (Dorking)</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label for="maxResults">Resultados</label>
+                <select id="maxResults" class="select-input">
+                  <option value="10">10 resultados</option>
+                  <option value="20" selected>20 resultados</option>
+                  <option value="30">30 resultados</option>
+                  <option value="50">50 resultados</option>
+                  <option value="75">75 resultados</option>
+                  <option value="100">100 resultados</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="search-options">
+              <label class="toggle-label">
+                <input type="checkbox" id="autoSave" checked />
+                <span class="toggle"></span>
+                Guardar automáticamente
+              </label>
+              <label class="toggle-label">
+                <input type="checkbox" id="enrichInstagram" checked />
+                <span class="toggle"></span>
+                Buscar Instagram
+              </label>
+              <label class="toggle-label">
+                <input type="checkbox" id="onlyNoWeb" />
+                <span class="toggle"></span>
+                Solo sin sitio web
+              </label>
+            </div>
+
+            <button class="btn btn-primary btn-lg" id="searchBtn" onclick="executeSearch()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+              Iniciar Búsqueda Inteligente
+            </button>
+          </div>
+
+          <!-- Search Progress -->
+          <div class="search-progress hidden" id="searchProgress">
+            <div class="progress-header">
+              <div class="pulse-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+              </div>
+              <div>
+                <h3 id="progressTitle">Analizando resultados...</h3>
+                <p id="progressSub">Recolectando información de cada negocio</p>
+              </div>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+              <span id="progressPct">0%</span>
+            </div>
+            <div class="progress-steps" id="progressSteps"></div>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="results-section hidden" id="resultsSection">
+          <div class="results-header">
+            <div>
+              <h3 id="resultsTitle">Resultados encontrados</h3>
+              <p id="resultsSub">Selecciona los que deseas guardar o contactar</p>
+            </div>
+            <div class="results-actions">
+              <button class="btn btn-ghost btn-sm" onclick="selectAllResults()">Seleccionar todos</button>
+              <button class="btn btn-secondary btn-sm" onclick="saveSelectedResults()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Guardar
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="sendToSelectedCampaign()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/></svg>
+                Campaña
+              </button>
+            </div>
+          </div>
+          <div class="results-grid" id="resultsGrid"></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════ -->
+      <!-- PAGE: PROSPECTS                             -->
+      <!-- ═══════════════════════════════════════════ -->
+      <section class="page" id="page-prospects">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Prospectos</h1>
+            <p class="page-sub">Gestiona y segmenta tu base de contactos</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-ghost btn-sm" onclick="exportProspects()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exportar CSV
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="showAddProspect()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Añadir Manual
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+          <div class="search-filter">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" id="prospectFilter" placeholder="Buscar prospecto..." oninput="onFilterText()" />
+          </div>
+          <div class="filter-chips">
+            <button class="chip active" onclick="filterByStatus('all', this)">Todos</button>
+            <button class="chip" onclick="filterByStatus('new', this)">Nuevos</button>
+            <button class="chip" onclick="filterByStatus('contacted', this)">Contactados</button>
+            <button class="chip" onclick="filterByStatus('replied', this)">Respondieron</button>
+            <button class="chip" onclick="filterByStatus('converted', this)">Convertidos</button>
+          </div>
+          <select class="select-input select-sm" id="nicheFilter" onchange="onNicheFilter()">
+            <option value="">Todos los nichos</option>
+          </select>
+        </div>
+        <!-- Niche Quick Tags -->
+        <div class="niche-quick-tags" id="nicheQuickTags"></div>
+
+        <div class="prospects-table-wrap">
+          <table class="prospects-table" id="prospectsTable">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()" /></th>
+                <th>Nombre</th>
+                <th>Teléfono</th>
+                <th>Nicho</th>
+                <th>Calificación</th>
+                <th>Web</th>
+                <th>Instagram</th>
+                <th>Estado</th>
+                <th>Score</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="prospectsBody"></tbody>
+          </table>
+          <div class="empty-table hidden" id="prospectsEmpty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <h3>No hay prospectos aún</h3>
+            <p>Usa el buscador para encontrar nuevos prospectos</p>
+            <button class="btn btn-primary" onclick="showPage('search')">Ir al Buscador</button>
+          </div>
+        </div>
+
+        <!-- Bulk Action Bar -->
+        <div class="bulk-bar hidden" id="bulkBar">
+          <span id="bulkCount">0 seleccionados</span>
+          <button class="btn btn-primary btn-sm" onclick="createCampaignFromSelected()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/></svg>
+            Nueva Campaña
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="deleteSelected()">🗑 Eliminar seleccionados</button>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════ -->
+      <!-- PAGE: CAMPAIGNS                             -->
+      <!-- ═══════════════════════════════════════════ -->
+      <section class="page" id="page-campaigns">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Campañas de Mensajes</h1>
+            <p class="page-sub">Automatiza el envío de mensajes con estrategia anti-ban</p>
+            <!-- Barra de límite diario anti-ban -->
+            <div style="margin-top:8px;display:flex;align-items:center;gap:10px;">
+              <div style="flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:4px;max-width:240px;">
+                <div id="dailyLimitBar" style="height:100%;width:0%;border-radius:4px;background:#22c55e;transition:width 0.5s,background 0.3s;"></div>
+              </div>
+              <span id="dailyLimitText" style="font-size:11px;color:var(--text-muted);white-space:nowrap;">Cargando límite diario...</span>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="showCreateCampaign()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva Campaña
+          </button>
+        </div>
+
+        <!-- Campaigns Grid -->
+        <div class="campaigns-grid" id="campaignsGrid">
+          <div class="empty-state" id="campaignsEmpty">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            </div>
+            <h3>No hay campañas aún</h3>
+            <p>Crea tu primera campaña para comenzar a enviar mensajes automatizados</p>
+            <button class="btn btn-primary" onclick="showCreateCampaign()">Crear Primera Campaña</button>
+          </div>
+        </div>
+
+        <!-- Multi-Campaign Live Monitor -->
+        <div class="multi-monitor" id="multiMonitor"></div>
+
+      </section>
+
+      <!-- ═══════════════════════════════════════════ -->
+      <!-- PAGE: NICHES                                -->
+      <!-- ═══════════════════════════════════════════ -->
+      <section class="page" id="page-niches">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Nichos & Categorías</h1>
+            <p class="page-sub">Segmenta tu base de prospectos por industria y nicho de mercado</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-ghost btn-sm" onclick="fetchNiches()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              Actualizar
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="showCreateCampaign()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/></svg>
+              Nueva Campaña
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="niches-stats-bar" id="nichesStatsBar"></div>
+
+        <!-- Niches Grid -->
+        <div class="niches-grid" id="nichesGrid">
+          <div class="empty-state" id="nichesEmpty">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>
+            </div>
+            <h3>Sin datos de nichos</h3>
+            <p>Busca prospectos para comenzar a segmentar por nicho</p>
+            <button class="btn btn-primary" onclick="showPage('search')">Buscar Prospectos</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════ -->
+      <!-- PAGE: TEMPLATES                             -->
+      <!-- ═══════════════════════════════════════════ -->
+      <section class="page" id="page-templates">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Plantillas de Mensajes</h1>
+            <p class="page-sub">Diseña mensajes personalizados y efectivos</p>
+          </div>
+          <button class="btn btn-primary" onclick="showCreateTemplate()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva Plantilla
+          </button>
+        </div>
+
+        <!-- Variables hint -->
+        <div class="variables-hint">
+          <span class="hint-label">Variables disponibles:</span>
+          <code>{nombre}</code>
+          <code>{negocio}</code>
+          <code>{nicho}</code>
+          <code>{ciudad}</code>
+          <code>{calificacion}</code>
+          <code>{fecha}</code>
+        </div>
+
+        <div class="templates-grid" id="templatesGrid">
+          <div class="empty-state" id="templatesEmpty">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/></svg>
+            </div>
+            <h3>No hay plantillas aún</h3>
+            <p>Crea plantillas de mensajes profesionales para tus campañas</p>
+            <button class="btn btn-primary" onclick="showCreateTemplate()">Crear Plantilla</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════ -->
+      <!-- PAGE: WHATSAPP CONNECT                      -->
+      <!-- ═══════════════════════════════════════════ -->
+      <section class="page" id="page-connect">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Conexión WhatsApp</h1>
+            <p class="page-sub">Vincula tu WhatsApp y visualiza tus conversaciones en tiempo real</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="createNewSession()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Conectar Nuevo Número
+          </button>
+        </div>
+
+        <div class="connect-layout">
+          <div class="sessions-panel">
+            <div id="sessionsGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:24px;">
+            </div>
+          </div>
+
+          <div class="instructions-panel">
+            <h3>Cómo conectar WhatsApp</h3>
+            <div class="steps">
+              <div class="step"><div class="step-num">1</div><div class="step-content"><strong>Abre WhatsApp</strong> en tu teléfono móvil</div></div>
+              <div class="step"><div class="step-num">2</div><div class="step-content">Ve a <strong>Configuración → Dispositivos vinculados</strong></div></div>
+              <div class="step"><div class="step-num">3</div><div class="step-content">Toca <strong>"Vincular un dispositivo"</strong> y apunta la cámara al QR</div></div>
+              <div class="step"><div class="step-num">4</div><div class="step-content">¡Listo! El sistema detectará la conexión <strong>automáticamente</strong></div></div>
+            </div>
+            <div class="security-note">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <div><strong>Seguridad garantizada</strong><p>Tu WhatsApp no comparte contraseñas. La sesión se almacena localmente.</p></div>
+            </div>
+            <div class="anti-ban-info">
+              <h4>🛡️ Sistema Anti-Ban Activo</h4>
+              <ul>
+                <li><span class="check">✓</span> Delays aleatorios entre mensajes (45-65s)</li>
+                <li><span class="check">✓</span> Pausas automáticas cada 10 mensajes</li>
+                <li><span class="check">✓</span> Respeta horario laboral (9am-8pm)</li>
+                <li><span class="check">✓</span> Límite de 30 mensajes/hora</li>
+                <li><span class="check">✓</span> Detención inteligente ante errores</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- MODALS                                          -->
+  <!-- ═══════════════════════════════════════════════ -->
+  
+  <!-- Modal: Create Campaign -->
+  <div class="modal-overlay hidden" id="campaignModal" onclick="closeModal('campaignModal')">
+    <div class="modal modal-lg" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Nueva Campaña de Mensajes</h3>
+        <button class="icon-btn" onclick="closeModal('campaignModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <!-- Nombre -->
+        <div class="form-group">
+          <label>Nombre de la Campaña *</label>
+          <input type="text" id="campName" placeholder="Ej: Campaña Abogados Cali — Abril" />
+        </div>
+
+        <!-- Opciones Multi-Número -->
+        <div class="form-row" style="margin-top: 16px;">
+          <div class="form-group" style="flex: 1;">
+            <label>Línea WhatsApp (Entorno) *</label>
+            <select id="campSessionId" class="select-input" disabled></select>
+            <small style="color:var(--text-3); font-size:0.7rem; margin-top:4px; display:block;">La campaña se ejecutará en el entorno seleccionado actualmente en la barra lateral.</small>
+          </div>
+        </div>
+
+        <!-- Prospectos -->
+        <div class="form-group">
+          <label>Prospectos objetivo</label>
+          <select id="campProspectMode" onchange="updateProspectMode()">
+            <option value="all_new">Todos los prospectos nuevos</option>
+            <option value="selected">Prospectos seleccionados</option>
+            <option value="no_web">Solo sin sitio web</option>
+            <option value="by_niche">Por nicho</option>
+          </select>
+        </div>
+        <div class="form-group hidden" id="nicheSelectGroup">
+          <label>Seleccionar Nicho</label>
+          <select id="campNiche"></select>
+        </div>
+
+        <!-- ─── ORDEN DE ENVÍO ─────────────────────────── -->
+        <div class="send-order-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/></svg>
+          <span>Orden de envío para cada prospecto</span>
+        </div>
+
+        <!-- 1) IMAGEN (siempre primero si hay) -->
+        <div class="send-step">
+          <div class="step-badge img-badge">📸 1º · Imagen</div>
+          <div class="step-content">
+            <div class="image-upload-area" id="imageUploadArea" onclick="document.getElementById('campImage').click()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span>Clic para subir imagen (opcional)</span>
+              <small>La imagen se envía primero, sola, sin texto · JPG, PNG, WebP — máx 10MB</small>
+            </div>
+            <input type="file" id="campImage" accept="image/*" class="hidden" onchange="handleImageUpload(event)" />
+            <div class="uploaded-image hidden" id="uploadedImagePreview">
+              <img id="uploadedImg" src="" alt="Imagen seleccionada" />
+              <button class="remove-img" onclick="removeUploadedImage()">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2+) MENSAJES DE TEXTO -->
+        <div id="messageStepsList">
+          <!-- Los pasos se renderizan con JS -->
+        </div>
+
+        <!-- Botón añadir mensaje -->
+        <button type="button" class="btn-add-msg" onclick="addMessageStep()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Añadir otro mensaje
+        </button>
+
+        <!-- Delay settings -->
+        <div class="form-row" style="margin-top:16px">
+          <div class="form-group">
+            <label>Delay entre prospectos (seg)</label>
+            <input type="number" id="campDelay" value="45" min="30" max="300" />
+          </div>
+          <div class="form-group">
+            <label>Delay entre mensajes (seg)</label>
+            <input type="number" id="campIntraDelay" value="8" min="3" max="60" />
+          </div>
+          <div class="form-group">
+            <label>Horario de envío</label>
+            <select id="campSchedule">
+              <option value="now" selected>Enviar ahora (sin límite de hora)</option>
+              <option value="business">Horario laboral (8am–9pm)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Programar Inicio (Opcional)</label>
+            <input type="datetime-local" id="campScheduledAt" class="select-input" style="width: 100%" />
+            <small>Dejar en blanco para inicio manual o inmediato.</small>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('campaignModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="createCampaign()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/></svg>
+          Crear Campaña
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal: Create Template -->
+  <div class="modal-overlay hidden" id="templateModal" onclick="closeModal('templateModal')">
+    <div class="modal modal-lg" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Nueva Plantilla de Mensajes</h3>
+        <button class="icon-btn" onclick="closeModal('templateModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <!-- Nombre + Nicho -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre de la Plantilla *</label>
+            <input type="text" id="tplName" placeholder="Ej: Oferta de Diseño Web" />
+          </div>
+          <div class="form-group">
+            <label>Nicho objetivo</label>
+            <input type="text" id="tplNiche" placeholder="Ej: Restaurantes, Abogados..." />
+          </div>
+        </div>
+
+        <!-- Emoji -->
+        <div class="form-group">
+          <label>Emoji de categoría</label>
+          <div class="emoji-selector">
+            <button type="button" class="emoji-btn active" onclick="selectEmoji(this,'🚀')">🚀</button>
+            <button type="button" class="emoji-btn" onclick="selectEmoji(this,'💼')">💼</button>
+            <button type="button" class="emoji-btn" onclick="selectEmoji(this,'🎨')">🎨</button>
+            <button type="button" class="emoji-btn" onclick="selectEmoji(this,'💡')">💡</button>
+            <button type="button" class="emoji-btn" onclick="selectEmoji(this,'🌟')">🌟</button>
+            <button type="button" class="emoji-btn" onclick="selectEmoji(this,'📱')">📱</button>
+            <button type="button" class="emoji-btn" onclick="selectEmoji(this,'💪')">💪</button>
+            <button type="button" class="emoji-btn" onclick="selectEmoji(this,'🎯')">🎯</button>
+          </div>
+        </div>
+
+        <!-- Zona multi-mensaje -->
+        <div class="send-order-header" style="margin-top:4px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Secuencia de mensajes — se envían en este orden</span>
+        </div>
+
+        <div id="tplMessageList">
+          <!-- Bloques de mensaje generados por JS -->
+        </div>
+
+        <button type="button" class="btn-add-msg" onclick="addTplMessage()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Añadir mensaje a la secuencia
+        </button>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('templateModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveTemplate()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+          Guardar Plantilla
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Modal: Prospect Details -->
+  <div class="modal-overlay hidden" id="prospectModal" onclick="closeModal('prospectModal')">
+    <div class="modal modal-lg" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="prospectModalName">Detalle del Prospecto</h3>
+        <button class="icon-btn" onclick="closeModal('prospectModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="prospectModalBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('prospectModal')">Cerrar</button>
+        <button class="btn btn-whatsapp" id="sendWABtn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 1.954C6.455 1.954 1.954 6.455 1.954 12c0 1.849.494 3.582 1.356 5.077L1.5 22.5l5.566-1.773A10.04 10.04 0 0 0 12 22.047c5.545 0 10.046-4.502 10.046-10.047S17.544 1.954 11.999 1.954z"/></svg>
+          Enviar Mensaje WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add Prospect Manually -->
+  <div class="modal-overlay hidden" id="addProspectModal" onclick="closeModal('addProspectModal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Añadir Prospecto Manual</h3>
+        <button class="icon-btn" onclick="closeModal('addProspectModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre / Negocio *</label>
+            <input type="text" id="addProspectName" placeholder="Ej: Salón de Belleza Glamour" />
+          </div>
+          <div class="form-group">
+            <label>Teléfono / WhatsApp *</label>
+            <input type="tel" id="addProspectPhone" placeholder="Ej: +573001234567" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nicho</label>
+            <input type="text" id="addProspectNiche" placeholder="Ej: Belleza & Bienestar" />
+          </div>
+          <div class="form-group">
+            <label>Sitio Web</label>
+            <input type="url" id="addProspectWebsite" placeholder="https://..." />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Instagram</label>
+          <input type="text" id="addProspectIG" placeholder="@usuario" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('addProspectModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveManualProspect()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Guardar Prospecto
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- MODAL: WA LIVE SCREEN (Puppeteer Remote View)   -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="modal-overlay hidden" id="waScreenModal" style="z-index:3000;padding:0;align-items:stretch;">
+    <div class="wascreen-shell" onclick="event.stopPropagation()">
+
+      <!-- Header bar -->
+      <div class="wascreen-header">
+        <div class="wascreen-header-left">
+          <div class="wascreen-live-dot"></div>
+          <span class="wascreen-title" id="waScreenTitle">WhatsApp Web — En Vivo</span>
+          <span class="wascreen-fps" id="waScreenFps"></span>
+        </div>
+        <div class="wascreen-header-right">
+          <button class="wascreen-tool-btn" onclick="waScreenTogglePause()" id="waScreenPauseBtn" title="Pausar/Reanudar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          </button>
+          <button class="wascreen-tool-btn" onclick="waScreenRefresh()" title="Actualizar ahora">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </button>
+          <button class="wascreen-close-btn" onclick="closeWaScreen()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Screen area -->
+      <div class="wascreen-viewport" id="waScreenViewport">
+        <div class="wascreen-loading" id="waScreenLoading">
+          <div class="wascreen-spinner"></div>
+          <span>Conectando con WhatsApp Web…</span>
+        </div>
+        <img id="waScreenImg" class="wascreen-img hidden" alt="WhatsApp Web en vivo"
+          draggable="false"
+          onclick="handleWaScreenClick(event)"
+          onwheel="handleWaScreenScroll(event)" />
+        <div class="wascreen-cursor-hint" id="waScreenCursorHint"></div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="wascreen-toolbar">
+        <div class="wascreen-toolbar-left">
+          <button class="wascreen-key-btn" onclick="waScreenKey('Escape')" title="ESC">ESC</button>
+          <button class="wascreen-key-btn" onclick="waScreenKey('Backspace')" title="Borrar">⌫</button>
+          <button class="wascreen-key-btn" onclick="waScreenKey('Enter')" title="Enter">↵</button>
+          <button class="wascreen-key-btn" onclick="waScreenKey('ArrowLeft')" title="←">◀</button>
+          <button class="wascreen-key-btn" onclick="waScreenKey('ArrowRight')" title="→">▶</button>
+        </div>
+        <div class="wascreen-input-wrap">
+          <input type="text" id="waScreenInput" class="wascreen-input"
+            placeholder="Escribe texto… (Enter para enviar al WA)"
+            onkeydown="handleWaScreenKeydown(event)" />
+          <button class="wascreen-send-btn" onclick="waScreenTypeText()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="m22 2-7 20-4-9-9-4Z"/></svg>
+            Escribir
+          </button>
+        </div>
+        <div class="wascreen-toolbar-right">
+          <span class="wascreen-hint">Click en la pantalla para interactuar</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- MODAL: WA VIEWER (Chat History)                 -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="modal-overlay hidden" id="waViewerModal" style="z-index:2000;padding:0;">
+    <div class="waviewer-shell" onclick="event.stopPropagation()">
+      <div class="waviewer-header">
+        <div class="waviewer-header-info">
+          <div class="waviewer-avatar">WA</div>
+          <div>
+            <div class="waviewer-name" id="waViewerTitle">WhatsApp</div>
+            <div class="waviewer-sub" id="waViewerSubtitle"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-sm btn-ghost" onclick="refreshWaChats()" title="Refrescar chats">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </button>
+          <button class="icon-btn" onclick="closeWaViewer()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="waviewer-body">
+        <div class="waviewer-sidebar">
+          <div class="waviewer-search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" id="waChatSearch" class="waviewer-search" placeholder="Buscar chat…" oninput="filterWaChats(this.value)" />
+          </div>
+          <div class="waviewer-chat-list" id="waChatList">
+            <div class="waviewer-empty-chats"><div class="waviewer-spinner"></div><span>Cargando…</span></div>
+          </div>
+        </div>
+        <div class="waviewer-messages" id="waMessagesPanel">
+          <div class="waviewer-welcome">
+            <div class="waviewer-welcome-icon">
+              <svg viewBox="0 0 64 64" fill="none" width="72" height="72"><circle cx="32" cy="32" r="30" fill="rgba(37,211,102,0.1)" stroke="rgba(37,211,102,0.25)" stroke-width="1.5"/></svg>
+            </div>
+            <h3>Selecciona una conversación</h3>
+            <p>Haz clic en cualquier chat de la izquierda para ver los mensajes</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
