@@ -266,6 +266,32 @@ function createClient(sessionId = DEFAULT_SESSION_ID) {
   const status = { connected: false, qr: null, phone: null, name: null, state: 'INITIALIZING' };
   const timers = {};
 
+  // --- Limpieza preventiva de SingletonLock ---
+  try {
+    const fs = require('fs');
+    const dataPath = process.env.DATA_DIR ? path.join(process.env.DATA_DIR, '.wwebjs_auth') : path.join(__dirname, '..', '.wwebjs_auth');
+    const sessionDir = path.join(dataPath, `session-${sessionId}`);
+    
+    // Lista de rutas donde Chromium deja archivos de bloqueo
+    const lockPaths = [
+      path.join(sessionDir, 'SingletonLock'),
+      path.join(sessionDir, 'SingletonCookie'),
+      path.join(sessionDir, 'SingletonSocket'),
+      path.join(sessionDir, 'Default', 'SingletonLock'),
+      path.join(sessionDir, 'Default', 'SingletonCookie'),
+      path.join(sessionDir, 'Default', 'SingletonSocket')
+    ];
+    
+    lockPaths.forEach(lockPath => {
+      if (fs.existsSync(lockPath)) {
+        try { fs.unlinkSync(lockPath); console.log(`[WA:${sessionId}] 🧹 Lock file eliminado preventivamente: ${path.basename(lockPath)}`); } catch(e){}
+      }
+    });
+  } catch(e) {
+    console.error(`[WA:${sessionId}] Error limpiando lock files:`, e.message);
+  }
+  // ------------------------------------------
+
   const client = new Client({
     authStrategy: new LocalAuth({
       clientId: sessionId,
