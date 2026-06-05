@@ -1,9 +1,10 @@
 FROM node:18-bullseye-slim
 
-# Install Chromium and its dependencies
+# Install Chromium, its dependencies, and build tools for node-gyp
 RUN apt-get update && apt-get install -y \
     chromium \
     fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
+    python3 build-essential \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
