@@ -283,8 +283,11 @@ function createClient(sessionId = DEFAULT_SESSION_ID) {
     ];
     
     lockPaths.forEach(lockPath => {
-      if (fs.existsSync(lockPath)) {
-        try { fs.unlinkSync(lockPath); console.log(`[WA:${sessionId}] 🧹 Lock file eliminado preventivamente: ${path.basename(lockPath)}`); } catch(e){}
+      try { 
+        fs.unlinkSync(lockPath); 
+        console.log(`[WA:${sessionId}] 🧹 Lock file eliminado preventivamente: ${path.basename(lockPath)}`); 
+      } catch(e) {
+        // Ignorar errores si no existe
       }
     });
   } catch(e) {
