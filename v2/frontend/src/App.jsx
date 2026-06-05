@@ -20,10 +20,13 @@ import CRMBoard from './components/CRMBoard';
 import ProspectMap from './components/ProspectMap';
 import ProspectDrawer from './components/ProspectDrawer';
 
+import { Menu } from 'lucide-react';
+
 export default function App() {
   const [activeTab, setActiveTab]           = useState('dashboard');
   const [sessions, setSessions]             = useState([]);
   const [currentSessionId, setCurrentSessionId] = useState('session-1');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Per-session data
   const [waStatus, setWaStatus]             = useState({});      // { [sessionId]: statusObj }
@@ -60,9 +63,9 @@ export default function App() {
   const fetchCampaigns = useCallback(async () => {
     const res = await api.getCampaigns(currentSessionId);
     if (!res.success) return;
-    setCampaigns(res.data);
+    setCampaigns(res.data || []);
     // Load logs for each campaign (non-blocking)
-    res.data.forEach(camp => {
+    (res.data || []).forEach(camp => {
       api.getCampaignLogs(camp.id, currentSessionId).then(l => {
         if (l.success) setCampaignLogs(prev => ({ ...prev, [camp.id]: l.data }));
       });
@@ -76,7 +79,7 @@ export default function App() {
 
   const fetchUnread = useCallback(async () => {
     const res = await api.getReplies(currentSessionId);
-    if (res.success) {
+    if (res.success && Array.isArray(res.data)) {
       const total = res.data.reduce((sum, c) => sum + (c.unread || 0), 0);
       setUnreadReplies(total);
     }
@@ -203,7 +206,7 @@ export default function App() {
   const currentWaStatus = waStatus[currentSessionId] || { connected: false, state: 'DISCONNECTED', qr: null };
 
   return (
-    <div className="flex h-screen bg-dark-950 text-white overflow-hidden">
+    <div className="flex flex-col md:flex-row h-screen bg-dark-950 text-white overflow-hidden">
       <Toaster
         position="top-right"
         toastOptions={{
@@ -213,19 +216,34 @@ export default function App() {
         }}
       />
 
+      {/* Top Bar solo para Móviles */}
+      <div className="md:hidden flex items-center justify-between p-4 border-b border-slate-800 bg-dark-900 z-40">
+        <h1 className="text-xl font-black tracking-tighter bg-gradient-to-br from-white via-slate-200 to-slate-500 bg-clip-text text-transparent">
+          PROSPECTOR<span className="text-primary-500">.AI</span>
+        </h1>
+        <button 
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="p-2 bg-slate-800 rounded-lg text-slate-300 hover:text-white"
+        >
+          <Menu size={24} />
+        </button>
+      </div>
+
       <Sidebar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        sessions={sessions}
+        setActiveTab={(t) => { setActiveTab(t); setIsMobileMenuOpen(false); }}
+        sessions={sessions || []}
         currentSessionId={currentSessionId}
         setCurrentSessionId={setCurrentSessionId}
         waStatus={waStatus}
         unreadReplies={unreadReplies}
         onNewSession={handleCreateWorkspace}
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
       />
 
-      <main className="flex-1 overflow-y-auto custom-scrollbar">
-        <div className="p-6 md:p-8">
+      <main className="flex-1 overflow-y-auto custom-scrollbar relative">
+        <div className="p-4 md:p-8">
           <AnimatePresence mode="wait">
             {activeTab === 'dashboard' && (
               <Dashboard

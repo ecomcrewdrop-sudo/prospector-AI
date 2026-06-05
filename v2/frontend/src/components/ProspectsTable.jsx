@@ -260,7 +260,10 @@ export default function ProspectsTable({ sessionId, onStartCampaign }) {
         )}
 
         {viewMode === 'table' && (
-          <table className="w-full text-left text-sm border-collapse">
+          <>
+          {/* Vista Escritorio (Tabla) */}
+          <div className="hidden md:block w-full overflow-x-auto">
+            <table className="w-full text-left text-sm border-collapse">
             <thead className="bg-slate-800/90 text-slate-400 sticky top-0 z-10 backdrop-blur-xl text-xs uppercase font-semibold tracking-wide">
               <tr>
                 <th className="px-5 py-4 border-b border-slate-700/50 w-10">
@@ -350,6 +353,49 @@ export default function ProspectsTable({ sessionId, onStartCampaign }) {
               )}
             </tbody>
           </table>
+          </div>
+
+          {/* Vista Móvil (Tarjetas) */}
+          <div className="md:hidden flex flex-col gap-3 p-4">
+            {loading ? (
+              <div className="py-10 text-center text-slate-500 text-sm">Cargando...</div>
+            ) : prospects.length === 0 ? (
+              <div className="py-10 text-center flex flex-col items-center text-slate-500">
+                <Database size={40} className="mb-3 opacity-20 text-primary-500" />
+                <p className="text-lg font-bold text-slate-300">Data Lake Vacío</p>
+              </div>
+            ) : (
+              prospects.map((p, idx) => {
+                const tags = p.tags ? JSON.parse(p.tags) : [];
+                return (
+                  <motion.div key={p.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.02 }}
+                    className={clsx('glass-panel p-4 flex flex-col gap-3 relative', selected.has(p.id) && 'ring-2 ring-primary-500')}
+                    onClick={() => setDrawerProspect(p)}
+                  >
+                    <div className="absolute top-4 right-4" onClick={e => e.stopPropagation()}>
+                      <input type="checkbox" checked={selected.has(p.id)} onChange={() => toggleSelect(p.id)}
+                        className="w-4 h-4 rounded border-slate-600 bg-slate-800" />
+                    </div>
+                    <div className="flex items-center gap-3 pr-8">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600/20 to-primary-800/40 flex items-center justify-center font-bold text-primary-400 text-lg shrink-0">
+                        {(p.name || '?').charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-200 text-base truncate">{p.name}</p>
+                        {p.phone && <p className="font-mono text-slate-400 text-xs mt-0.5">{p.phone}</p>}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      <span className={clsx('px-2 py-1 rounded-md text-[10px] font-black tracking-widest uppercase border', STATUS_COLORS[p.status] || STATUS_COLORS.new)}>{p.status}</span>
+                      <span className={clsx('px-2 py-1 rounded-full text-[10px] font-bold', STAGE_COLORS[p.stage] || STAGE_COLORS.new)}>{STAGE_LABELS[p.stage] || 'Nuevo'}</span>
+                      <span className="text-xs text-slate-400 flex items-center ml-auto font-mono">Score: {p.score}</span>
+                    </div>
+                  </motion.div>
+                );
+              })
+            )}
+          </div>
+          </>
         )}
       </div>
 

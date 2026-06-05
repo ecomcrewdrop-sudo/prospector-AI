@@ -22,6 +22,12 @@
     background-image: radial-gradient(circle at 50% -20%, var(--color-dark-800), var(--color-dark-900));
     min-height: 100vh;
     font-family: 'Inter', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Prevent auto-zoom on iOS by forcing font-size 16px */
+  input, textarea, select {
+    font-size: 16px !important;
   }
 }
 

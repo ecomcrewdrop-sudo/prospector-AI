@@ -170,7 +170,7 @@ export default function Dashboard({ stats, analytics, waStatus, campaigns, curre
     <motion.div key="dashboard" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-8">
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
         <KpiCard title="Prospectos Activos" value={stats?.activeProspects} icon={Users}       color="border-t-blue-500"   subtitle="Listos para contactar" />
         <KpiCard title="Enviados Hoy"       value={analytics?.sentToday}   icon={Send}        color="border-t-purple-500" subtitle="Mensajes del día" />
         <KpiCard title="Tasa de Respuesta"  value={`${analytics?.responseRate ?? 0}%`} icon={TrendingUp} color="border-t-green-500" subtitle="De contactados" />

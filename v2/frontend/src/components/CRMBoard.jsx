@@ -68,7 +68,7 @@ function ProspectCard({ prospect, onClick, isDragging }) {
 
 function StageColumn({ stage, prospects, onCardClick, activeId }) {
   return (
-    <div className={`flex-shrink-0 w-60 flex flex-col border-t-2 ${stage.color} rounded-xl ${stage.bg} border border-slate-800`}>
+    <div className={`flex-shrink-0 w-[85vw] md:w-60 snap-center flex flex-col border-t-2 ${stage.color} rounded-xl ${stage.bg} border border-slate-800`}>
       <div className="p-3 border-b border-slate-800/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -180,7 +180,7 @@ export default function CRMBoard({ sessionId, onProspectClick }) {
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="flex gap-3 overflow-x-auto pb-4 custom-scrollbar" style={{ minHeight: '500px' }}>
+      <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar snap-x snap-mandatory" style={{ minHeight: '500px' }}>
         {STAGES.map(stage => (
           <StageColumn
             key={stage.id}

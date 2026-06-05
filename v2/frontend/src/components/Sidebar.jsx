@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import {
   LayoutDashboard, Database, Zap, BarChart2, MessageCircle,
@@ -115,7 +115,7 @@ function GlobalSearch({ onClose, onNavigate }) {
   );
 }
 
-export default function Sidebar({ activeTab, setActiveTab, sessions, currentSessionId, setCurrentSessionId, waStatus, unreadReplies, onNewSession }) {
+export default function Sidebar({ activeTab, setActiveTab, sessions, currentSessionId, setCurrentSessionId, waStatus, unreadReplies, onNewSession, isOpen, onClose }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const curStatus = waStatus[currentSessionId] || { connected: false, state: 'DISCONNECTED', qr: null };
 
@@ -139,7 +139,23 @@ export default function Sidebar({ activeTab, setActiveTab, sessions, currentSess
         />
       )}
 
-      <aside className="w-72 flex flex-col shrink-0 relative z-20">
+      {/* Overlay for mobile */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 md:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      <aside className={clsx(
+        "w-72 flex flex-col shrink-0 z-50 fixed inset-y-0 left-0 md:relative transition-transform duration-300 ease-in-out",
+        isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+      )}>
         <div className="glass-panel h-full flex flex-col overflow-hidden border border-slate-700/50 shadow-2xl bg-dark-800/40">
 
           {/* Logo */}
