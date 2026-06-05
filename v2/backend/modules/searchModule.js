@@ -125,14 +125,14 @@ async function searchGoogleMaps(query, location, maxResults, onProgress) {
     browser = await puppeteer.launch({
       headless: 'new',
       userDataDir: path.join(os.tmpdir(), `puppeteer_gm_${uuidv4()}`),
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--window-size=1366,768'],
-      defaultViewport: { width: 1366, height: 768 }
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--disable-site-isolation-trials', '--js-flags="--max-old-space-size=128"', '--window-size=1024,768'],
+      defaultViewport: { width: 1024, height: 768 }
     });
 
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
     await page.setRequestInterception(true);
-    page.on('request', req => ['image', 'font', 'media'].includes(req.resourceType()) ? req.abort() : req.continue());
+    page.on('request', req => ['image', 'font', 'media', 'stylesheet'].includes(req.resourceType()) ? req.abort() : req.continue());
 
     const url = `https://www.google.com/maps/search/${encodeURIComponent(query + ' ' + location)}?hl=es&gl=co`;
     onProgress?.({ pct: 15, text: `🔍 Abriendo Google Maps para "${query}"...` });
@@ -175,8 +175,8 @@ async function searchGoogleMaps(query, location, maxResults, onProgress) {
     if (!placeLinks.length) return [];
     onProgress?.({ pct: 28, text: `📍 ${placeLinks.length} negocios encontrados. Extrayendo...` });
 
-    // Extracción paralela con pool de 4 páginas
-    const CONCURRENCY = 4;
+    // Extracción paralela reducida a 1 para evitar OOM Crash
+    const CONCURRENCY = 1;
     const results = [];
     for (let i = 0; i < placeLinks.length; i += CONCURRENCY) {
       const batch = placeLinks.slice(i, i + CONCURRENCY);
@@ -378,8 +378,8 @@ async function searchInstagramBusiness(query, location, maxResults) {
     browser = await puppeteer.launch({
       headless: 'new',
       userDataDir: path.join(os.tmpdir(), `puppeteer_ig_${uuidv4()}`),
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
-      defaultViewport: { width: 1280, height: 800 }
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--disable-site-isolation-trials', '--js-flags="--max-old-space-size=128"'],
+      defaultViewport: { width: 1024, height: 768 }
     });
 
     const page = await browser.newPage();
