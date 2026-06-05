@@ -11,7 +11,7 @@
  *  5. Calcular score y devolver prospectos listos para importar
  */
 
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID: uuidv4 } = require('crypto');
 const IG_BASE = 'https://graph.facebook.com/v19.0';
 
 // ── Leer credenciales desde DB o env ─────────────────────────
